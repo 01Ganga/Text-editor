@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Undo-Redo Text Editor | DSA Project</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600&display=swap');
+  :root{ --bg:#0f0f12; --card:#1c1c20; --border:#2a2a30; --accent:#8b5cf6; --accent2:#06b6d4; --text:#e5e5e5; --muted:#9ca3af; }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:20px}
+  .header{width:100%;max-width:900px;display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+  .logo{font-weight:600;font-size:18px}
+  .badge{font-family:'JetBrains Mono',monospace;background:var(--card);border:1px solid var(--border);padding:6px 12px;border-radius:20px;font-size:12px;color:var(--muted)}
+  .card{width:100%;max-width:900px;background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden}
+  .toolbar{display:flex;gap:8px;padding:14px 16px;background:#18181b;border-bottom:1px solid var(--border);flex-wrap:wrap;align-items:center}
+  .btn{display:flex;align-items:center;gap:8px;padding:9px 16px;border-radius:10px;border:1px solid var(--border);background:#27272a;color:var(--text);cursor:pointer;font-weight:600;font-size:14px}
+  .btn.primary{background:#8b5cf6;border-color:#8b5cf6;color:white}
+  .stack-info{margin-left:auto;display:flex;gap:16px;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted)}
+  textarea{width:100%;height:420px;background:transparent;border:none;outline:none;padding:20px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:15px;line-height:1.7;resize:none}
+  .footer{width:100%;max-width:900px;display:flex;justify-content:space-between;padding:14px 4px;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted)}
+</style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">📝 TextCraft Editor</div>
+    <div class="badge">DSA: Two Stacks</div>
+  </div>
+  <div class="card">
+    <div class="toolbar">
+      <button class="btn" onclick="undo()">↩️ Undo</button>
+      <button class="btn" onclick="redo()">↪️ Redo</button>
+      <button class="btn" onclick="clearText()">🗑️ Clear</button>
+      <button class="btn primary" onclick="copyText()">📋 Copy</button>
+      <div class="stack-info">
+        <span>Undo: <b id="uCount">1</b></span>
+        <span>Redo: <b id="rCount">0</b></span>
+      </div>
+    </div>
+    <textarea id="editor" placeholder="Type something here..." oninput="saveState()"></textarea>
+  </div>
+  <div class="footer">
+    <span>Words: <span id="wCount">0</span> | Chars: <span id="cCount">0</span></span>
+    <span>Undo-Redo Functionality for Text Editor</span>
+  </div>
+<script>
+  let undoStack = [""];
+  let redoStack = [];
+  const editor = document.getElementById("editor");
+  function saveState(){
+    if(undoStack[undoStack.length-1] !== editor.value){
+      undoStack.push(editor.value);
+      redoStack = [];
+      updateUI();
+    }
+    updateCounts();
+  }
+  function undo(){
+    if(undoStack.length > 1){
+      redoStack.push(undoStack.pop());
+      editor.value = undoStack[undoStack.length-1];
+      updateUI(); updateCounts();
+    }
+  }
+  function redo(){
+    if(redoStack.length > 0){
+      let state = redoStack.pop();
+      undoStack.push(state);
+      editor.value = state;
+      updateUI(); updateCounts();
+    }
+  }
+  function clearText(){ editor.value = ""; saveState(); }
+  function copyText(){ navigator.clipboard.writeText(editor.value); alert("Copied!"); }
+  function updateUI(){
+    document.getElementById("uCount").textContent = undoStack.length;
+    document.getElementById("rCount").textContent = redoStack.length;
+  }
+  function updateCounts(){
+    let text = editor.value.trim();
+    document.getElementById("wCount").textContent = text ? text.split(/\s+/).length : 0;
+    document.getElementById("cCount").textContent = editor.value.length;
+  }
+  document.addEventListener('keydown', (e)=>{
+    if(e.ctrlKey && e.key === 'z'){ e.preventDefault(); undo(); }
+    if(e.ctrlKey && e.key === 'y'){ e.preventDefault(); redo(); }
+  });
+</script>
+</body>
+</html>
